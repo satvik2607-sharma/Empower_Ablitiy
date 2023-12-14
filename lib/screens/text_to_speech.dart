@@ -20,7 +20,7 @@ class _TextToSpeechState extends State<TextToSpeech> {
   var _inputText = TextEditingController();
 
   @override
-  void initState() {
+  void initState() {        
     // TODO: implement initState
     super.initState();
     initTTS();

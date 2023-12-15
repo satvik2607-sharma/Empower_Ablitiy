@@ -15,7 +15,12 @@ class _MainMenuState extends State<MainMenu> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.red,
-        title: Text("EmpowerAbility"),
+        title: Text(
+          "EmpowerAbility",
+          style: TextStyle(
+            color: Colors.white,
+          ),
+        ),
       ),
       body: GridView.count(
         crossAxisCount: 2,
@@ -29,7 +34,7 @@ class _MainMenuState extends State<MainMenu> {
           IconButton(
               onPressed: () {
                 Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => HomePage()));
+                    MaterialPageRoute(builder: (context) => SpeechScreen()));
               },
               icon: Image.asset('lib/icons/speech-to-text.png')),
           Padding(
@@ -47,7 +52,7 @@ class _MainMenuState extends State<MainMenu> {
               "Speech to text",
               style: TextStyle(fontSize: 20),
             ),
-          )
+          ),
         ],
       ),
     );

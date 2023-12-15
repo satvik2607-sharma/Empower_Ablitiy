@@ -1,102 +1,105 @@
+import 'package:avatar_glow/avatar_glow.dart';
 import 'package:flutter/material.dart';
-import 'package:speech_to_text/speech_to_text.dart';
+import 'package:highlight_text/highlight_text.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class SpeechScreen extends StatefulWidget {
+  const SpeechScreen({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<SpeechScreen> createState() => _SpeechScreenState();
 }
 
-class _HomePageState extends State<HomePage> {
-  bool _speechEnabled = false;
-  final SpeechToText _speechToText = SpeechToText();
-  String _wordsSpoken = "";
-  double _confidenceLevel = 0;
+class _SpeechScreenState extends State<SpeechScreen> {
+  late stt.SpeechToText _speech;
+  bool _isListening = false;
+  String _text = 'Press the button and start speaking';
+  double _confidence = 1.0;
 
   @override
   void initState() {
     // TODO: implement initState
-    initSpeech();
     super.initState();
+    _speech = stt.SpeechToText();
   }
 
-  void initSpeech() async {
-    _speechEnabled = await _speechToText.initialize();
-    setState(() {});
-  }
-
-  void _startListning() async {
-    await _speechToText.listen(onResult: _onSpeechResult);
-    setState(() {
-      _confidenceLevel = 0;
-    });
-  }
-
-  void _stopListening() async {
-    await _speechToText.stop();
-    setState(() {});
-  }
-
-  void _onSpeechResult(result) {
-    setState(() {
-      _wordsSpoken = "${result.recognizedWords}";
-      _confidenceLevel = result.confidence;
-    });
-  }
+  final Map<String, HighlightedWord> _highlights = {
+    'flutter': HighlightedWord(
+        onTap: () => print('flutter'),
+        textStyle: const TextStyle(
+            color: Colors.blue, fontWeight: FontWeight.bold, fontSize: 32.0)),
+    'voice': HighlightedWord(
+        onTap: () => print('voice'),
+        textStyle: const TextStyle(
+            color: Colors.green, fontWeight: FontWeight.bold, fontSize: 32.0)),
+    'subscribe': HighlightedWord(
+        onTap: () => print('subscribe'),
+        textStyle: const TextStyle(
+            color: Colors.red, fontWeight: FontWeight.bold, fontSize: 32.0)),
+    'like': HighlightedWord(
+        onTap: () => print('like'),
+        textStyle: const TextStyle(
+            color: Colors.blueAccent, fontWeight: FontWeight.bold)),
+    'comment': HighlightedWord(
+        onTap: () => print('comment'),
+        textStyle:
+            const TextStyle(color: Colors.green, fontWeight: FontWeight.bold))
+  };
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Speech Demo",
+          'Confidence: ${(_confidence * 100.0).toStringAsFixed(1)}%',
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: Colors.red,
       ),
-      body: Center(
-        child: Column(
-          children: [
-            Padding(padding: EdgeInsets.all(16)),
-            Container(
-              child: Text(
-                _speechToText.isListening
-                    ? "Listening..."
-                    : _speechEnabled
-                        ? "Tap microphone to start listening..."
-                        : "speech is not available",
-                style: TextStyle(fontSize: 20.0),
-              ),
-            ),
-            Expanded(
-                child: Container(
-              padding: EdgeInsets.all(16),
-              child: Text( 
-                _wordsSpoken,
-                style: TextStyle(fontSize: 25, fontWeight: FontWeight.w300),
-              ),
-            )),
-            if (_speechToText.isNotListening && _confidenceLevel > 0)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 100),
-                child: Text(
-                  "Confidence: ${(_confidenceLevel * 100).toStringAsFixed(1)}%",  
-                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.w200),
-                ),
-              )
-          ],
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: AvatarGlow(
+        animate: _isListening,
+        glowColor: Theme.of(context).primaryColor,
+        repeat: true,
+        duration: const Duration(milliseconds: 2000),
+        child: FloatingActionButton(
+          onPressed: _listen,
+          child: Icon(_isListening ? Icons.mic : Icons.mic_none),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _speechToText.isListening ? _stopListening : _startListning,
-        tooltip: 'Listen',
-        child: Icon(
-          _speechToText.isNotListening ? Icons.mic_off : Icons.mic,
-          color: Colors.white,
+      body: SingleChildScrollView(
+        reverse: true,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(30.0, 30.0, 30.0, 150.0),
+          child: TextHighlight(
+            text: _text,
+            words: _highlights,
+            textStyle: const TextStyle(
+                fontSize: 32.0,
+                color: Colors.black,
+                fontWeight: FontWeight.w400),
+          ),
         ),
-        backgroundColor: Colors.red,
       ),
     );
+  }
+
+  void _listen() async {
+    if (!_isListening) {
+      bool available = await _speech.initialize(
+        onStatus: (val) => print('onstatus : $val'),
+        onError: (val) => print('onerror: $val'),
+      );
+      if (available) {
+        setState(() => _isListening = true);
+        _speech.listen(
+            onResult: (val) => setState(() {
+                  _text = val.recognizedWords;
+                  if (val.hasConfidenceRating && val.confidence > 0) {
+                    _confidence = val.confidence;
+                  }
+                }));
+      }
+    }
   }
 }

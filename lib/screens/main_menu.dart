@@ -25,7 +25,7 @@ class _MainMenuState extends State<MainMenu> {
       ),
       body: GridView.count(
         crossAxisCount: 2,
-        children: [ 
+        children: [
           IconButton(
               onPressed: () {
                 Navigator.push(context,

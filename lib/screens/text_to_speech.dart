@@ -69,7 +69,7 @@ class _TextToSpeechState extends State<TextToSpeech> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text(
+        title: const Text(
           'Text to speech',
           style: TextStyle(color: Colors.white),
         ),

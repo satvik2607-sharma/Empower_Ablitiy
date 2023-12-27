@@ -53,7 +53,7 @@ class _SpeechScreenState extends State<SpeechScreen> {
         centerTitle: true,
         title: Text(
           'Confidence: ${(_confidence * 100.0).toStringAsFixed(1)}%',
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white),
         ),
         backgroundColor: Colors.red,
       ),
